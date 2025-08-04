@@ -51,10 +51,13 @@ export async function GET() {
         }
       }
   
-      return new Response('OK');
+      return new Response('OK', { status: 200 });
     } catch (err) {
-      console.error('SCHEDULE ERROR:', err);
-      return new Response('Internal Server Error', { status: 500 });
-    }
+        console.error('❌ SCHEDULE ERROR:', err);
+        return new Response(JSON.stringify({ error: true, message: (err as any).message || 'unknown error' }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' }
+        });
+      }      
   }
   
