@@ -21,14 +21,17 @@ async function getAuthClient() {
 }
 
 export async function getSheetData(sheetName: string) {
-  const auth = await getAuthClient();
-  const spreadsheetId = process.env.SPREADSHEET_ID!;
-
-  const res = await sheets.spreadsheets.values.get({
-    auth,
-    spreadsheetId,
-    range: sheetName,
-  });
-
-  return res.data.values || [];
-}
+    const auth = await getAuthClient();
+    const spreadsheetId = process.env.SPREADSHEET_ID!;
+    console.log(`Fetching sheet "${sheetName}" from spreadsheet ${spreadsheetId}`);
+  
+    const res = await sheets.spreadsheets.values.get({
+      auth,
+      spreadsheetId,
+      range: sheetName,
+    });
+  
+    console.log(`Got ${res.data.values?.length || 0} rows from sheet "${sheetName}"`);
+  
+    return res.data.values || [];
+  }  
