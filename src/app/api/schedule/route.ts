@@ -14,41 +14,47 @@ function parseTime(time: string | number): number | null {
 }
 
 export async function GET() {
-  const schedule = await getSheetData('Schedule');
-  const users = await getSheetData('Users');
-
-  const userIds = users.slice(1).map(r => r[1]).filter(Boolean);
-
-  const now = new Date();
-  const currentTime = now.getHours() * 60 + now.getMinutes();
-  const dayMap = ["SU", "M", "T", "W", "TH", "F", "SA"];
-  const today = dayMap[now.getDay()];
-
-  for (let i = 9; i < schedule.length; i++) {
-    const [day, period, start, end, subject, teacher] = schedule[i];
-    if (!subject || subject === "None" || day.toUpperCase() !== today) continue;
-
-    const classStart = parseTime(start);
-    const classEnd = parseTime(end);
-    if (classStart == null || classEnd == null) continue;
-
-    let message = null;
-    if (currentTime === classStart - 10) {
-      message = `📚 วิชา "${subject}" จะเริ่มใน 10 นาที\n🕘 เวลา ${start}\n👨‍🏫 ${teacher || "ไม่ระบุ"}\n📍 คาบที่ ${period}`;
-    } else if (currentTime === classStart - 5) {
-      message = `⏰ วิชา "${subject}" ใกล้เริ่มใน 5 นาที!\nเตรียมตัวให้พร้อม 🔔`;
-    } else if (currentTime === classStart) {
-      message = `✅ วิชา "${subject}" เริ่มแล้ว\n👨‍🏫 ${teacher}\n📍 คาบที่ ${period}\n‼️ หยุดเล่นเกมได้แล้ว‼️`;
-    } else if (currentTime === classEnd) {
-      message = `⛔ วิชา "${subject}" จบแล้ว\n👨‍🏫 ${teacher}\n📍 คาบที่ ${period}`;
-    }
-
-    if (message) {
-      for (const id of userIds) {
-        await sendLineMessage(id, message);
+    try {
+      const schedule = await getSheetData('Schedule');
+      const users = await getSheetData('Users');
+  
+      const userIds = users.slice(1).map(r => r[1]).filter(Boolean);
+  
+      const now = new Date();
+      const currentTime = now.getHours() * 60 + now.getMinutes();
+      const dayMap = ["SU", "M", "T", "W", "TH", "F", "SA"];
+      const today = dayMap[now.getDay()];
+  
+      for (let i = 9; i < schedule.length; i++) {
+        const [day, period, start, end, subject, teacher] = schedule[i];
+        if (!subject || subject === "None" || day.toUpperCase() !== today) continue;
+  
+        const classStart = parseTime(start);
+        const classEnd = parseTime(end);
+        if (classStart == null || classEnd == null) continue;
+  
+        let message = null;
+        if (currentTime === classStart - 10) {
+          message = `📚 วิชา "${subject}" จะเริ่มใน 10 นาที\n🕘 เวลา ${start}\n👨‍🏫 ${teacher || "ไม่ระบุ"}\n📍 คาบที่ ${period}`;
+        } else if (currentTime === classStart - 5) {
+          message = `⏰ วิชา "${subject}" ใกล้เริ่มใน 5 นาที!\nเตรียมตัวให้พร้อม 🔔`;
+        } else if (currentTime === classStart) {
+          message = `✅ วิชา "${subject}" เริ่มแล้ว\n👨‍🏫 ${teacher}\n📍 คาบที่ ${period}\n‼️ หยุดเล่นเกมได้แล้ว‼️`;
+        } else if (currentTime === classEnd) {
+          message = `⛔ วิชา "${subject}" จบแล้ว\n👨‍🏫 ${teacher}\n📍 คาบที่ ${period}`;
+        }
+  
+        if (message) {
+          for (const id of userIds) {
+            await sendLineMessage(id, message);
+          }
+        }
       }
+  
+      return new Response('OK');
+    } catch (err) {
+      console.error('SCHEDULE ERROR:', err);
+      return new Response('Internal Server Error', { status: 500 });
     }
   }
-
-  return new Response('OK');
-}
+  
