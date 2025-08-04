@@ -24,15 +24,21 @@ export async function GET() {
       const currentTime = now.getHours() * 60 + now.getMinutes();
       const dayMap = ["SU", "M", "T", "W", "TH", "F", "SA"];
       const today = dayMap[now.getDay()];
-  
-      for (let i = 9; i < schedule.length; i++) {
+
+      console.log({ currentTime, today });
+
+      for (let i = 0; i < schedule.length; i++) {
         const [day, period, start, end, subject, teacher] = schedule[i];
+        console.log({ i, day, period, start, end, subject, teacher });
+      
         if (!subject || subject === "None" || day.toUpperCase() !== today) continue;
-  
+      
         const classStart = parseTime(start);
         const classEnd = parseTime(end);
         if (classStart == null || classEnd == null) continue;
-  
+      
+        console.log({ classStart, classEnd });
+      
         let message = null;
         if (currentTime === classStart - 10) {
           message = `📚 วิชา "${subject}" จะเริ่มใน 10 นาที\n🕘 เวลา ${start}\n👨‍🏫 ${teacher || "ไม่ระบุ"}\n📍 คาบที่ ${period}`;
@@ -43,13 +49,15 @@ export async function GET() {
         } else if (currentTime === classEnd) {
           message = `⛔ วิชา "${subject}" จบแล้ว\n👨‍🏫 ${teacher}\n📍 คาบที่ ${period}`;
         }
-  
+      
         if (message) {
+          console.log(`ส่งข้อความ: ${message} | ไปยัง userIds: ${userIds.join(', ')}`);
           for (const id of userIds) {
             await sendLineMessage(id, message);
           }
         }
       }
+      
   
       return new Response('OK', { status: 200 });
     } catch (err) {
