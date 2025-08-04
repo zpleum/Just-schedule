@@ -45,7 +45,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
     const userIds = users.slice(1).map(r => r[1]).filter(Boolean) as string[];
 
     const now = new Date();
-    let currentTime = now.getHours() * 60 + now.getMinutes();
+    const currentTime = now.getHours() * 60 + now.getMinutes();
     const dayMap = ['SU', 'M', 'T', 'W', 'TH', 'F', 'SA'];
     const today = dayMap[now.getDay()];
 
