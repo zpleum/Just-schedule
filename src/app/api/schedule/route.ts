@@ -1,4 +1,4 @@
-import type { NextApiRequest, NextApiResponse } from 'next';
+import { NextRequest, NextResponse } from 'next/server';
 import { getSheetData } from '@/libs/sheets';
 import { sendLineMessage } from '@/libs/line';
 
@@ -16,7 +16,6 @@ function parseTime(time: string | number): number | null {
 }
 
 function isCurrentTimeMatch(currentTime: number, classStart: number, classEnd: number) {
-  // รองรับกรณีเรียนข้ามวัน (end < start)
   if (classEnd < classStart) {
     const adjustedEnd = classEnd + 24 * 60;
     let adjustedCurrent = currentTime;
@@ -37,7 +36,8 @@ function isCurrentTimeMatch(currentTime: number, classStart: number, classEnd: n
   };
 }
 
-export default async function handler(req: NextApiRequest, res: NextApiResponse) {
+// ให้เปลี่ยนจาก handler เป็น GET
+export async function GET(request: NextRequest) {
   try {
     const schedule = await getSheetData('Schedule');
     const users = await getSheetData('Users');
@@ -77,9 +77,9 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
       }
     }
 
-    res.status(200).json({ status: 'ok' });
+    return NextResponse.json({ status: 'ok' });
   } catch (error) {
     console.error('Schedule API error:', error);
-    res.status(500).json({ error: 'Internal Server Error' });
+    return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 });
   }
 }
