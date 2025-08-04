@@ -54,10 +54,14 @@ export async function GET() {
       return new Response('OK', { status: 200 });
     } catch (err) {
         console.error('❌ SCHEDULE ERROR:', err);
-        return new Response(JSON.stringify({ error: true, message: (err as any).message || 'unknown error' }), {
-          status: 500,
-          headers: { 'Content-Type': 'application/json' }
-        });
-      }      
+        const message = err instanceof Error ? err.message : 'unknown error';
+        return new Response(
+          JSON.stringify({ error: true, message }),
+          {
+            status: 500,
+            headers: { 'Content-Type': 'application/json' }
+          }
+        );
+      }        
   }
   
